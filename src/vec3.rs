@@ -114,11 +114,35 @@ impl Mul<f64> for Vec3 {
     }
 }
 
+impl Mul<u32> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, t: u32) -> Self {
+        Vec3::new(
+            t as f64 * self.x(),
+            t as f64 * self.y(),
+            t as f64 * self.z(),
+        )
+    }
+}
+
 impl Mul<Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, vec: Vec3) -> Vec3 {
         Vec3::new(self * vec.x(), self * vec.y(), self * vec.z())
+    }
+}
+
+impl Mul<Vec3> for u32 {
+    type Output = Vec3;
+
+    fn mul(self, vec: Vec3) -> Vec3 {
+        Vec3::new(
+            self as f64 * vec.x(),
+            self as f64 * vec.y(),
+            self as f64 * vec.z(),
+        )
     }
 }
 
@@ -139,6 +163,14 @@ impl Div<f64> for Vec3 {
 
     fn div(self, t: f64) -> Self {
         self * (1.0 / t)
+    }
+}
+
+impl Div<u32> for Vec3 {
+    type Output = Self;
+
+    fn div(self, t: u32) -> Self {
+        self * (1.0 / t as f64)
     }
 }
 
