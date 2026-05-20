@@ -8,9 +8,11 @@ pub mod ray;
 pub mod vec3;
 
 fn ray_color(r: &Ray) -> Color {
+    // multiplying by distance t would give exact 3D point at that distance
     let unit_direction = unit_vector(*r.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
 
+    // Start color -> end color
     return (1.0 - a) * Color::new(0.3, 1.0, 0.3) + a * Color::new(0.6, 0.0, 1.0);
 }
 
@@ -52,9 +54,13 @@ fn main() {
         io::stderr().flush().unwrap();
 
         for i in 0..image_width as u32 {
+            // how far over and down the pixel is from pixel(0,0)
             let pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
+
+            // vector of the pixel from the lens(camera)
             let ray_direction = pixel_center - camera_center;
 
+            // start point and the direction vector
             let r = Ray::new(camera_center, ray_direction);
 
             let pixel_color = ray_color(&r);
