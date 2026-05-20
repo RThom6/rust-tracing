@@ -1,3 +1,4 @@
 # rust-tracing
 
-My implementation folloowing the Ray Tracing in a Weekend book
+My implementation following the Ray Tracing in a Weekend book
+Learning as I go :)
