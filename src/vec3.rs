@@ -5,6 +5,7 @@ use std::ops::{
 
 #[derive(Copy, Clone, Default, Debug, PartialEq)]
 pub struct Vec3 {
+    // x, y, z are the steps of displacement along each axis between A and B
     e: [f64; 3],
 }
 

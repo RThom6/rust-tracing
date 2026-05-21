@@ -1,6 +1,6 @@
 use crate::color::{Color, write_color};
 use crate::ray::Ray;
-use crate::vec3::{Point3, Vec3, unit_vector};
+use crate::vec3::*;
 use std::io::{self, Write};
 
 pub mod color;
@@ -8,12 +8,28 @@ pub mod ray;
 pub mod vec3;
 
 fn ray_color(r: &Ray) -> Color {
+    if hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.2, r) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
+
     // multiplying by distance t would give exact 3D point at that distance
     let unit_direction = unit_vector(*r.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
 
     // Start color -> end color
-    return (1.0 - a) * Color::new(0.3, 1.0, 0.3) + a * Color::new(0.6, 0.0, 1.0);
+    return (1.0 - a) * Color::new(0.9, 1.0, 0.3) + a * Color::new(0.6, 0.0, 1.0);
+}
+
+fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> bool {
+    let oc = *center - *r.origin();
+
+    // quadratic equation
+    let a = dot(*r.direction(), *r.direction());
+    let b = -2.0 * dot(*r.direction(), oc);
+    let c = dot(oc, oc) - radius * radius;
+    let disctriminant = b * b - 4.0 * a * c;
+
+    disctriminant >= 0.0
 }
 
 fn main() {
