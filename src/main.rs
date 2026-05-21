@@ -4,13 +4,15 @@ use crate::vec3::*;
 use std::io::{self, Write};
 
 pub mod color;
+pub mod hittable;
 pub mod ray;
+pub mod sphere;
 pub mod vec3;
 
 fn ray_color(r: &Ray) -> Color {
     // p = center of sphere
-    let p = Point3::new(0.2, 0.1, -1.0);
-    let t = hit_sphere(&p, 0.2, r);
+    let p = Point3::new(0.0, 0.0, -1.0);
+    let t = hit_sphere(&p, 0.5, r);
 
     if t > 0.0 {
         let n = unit_vector(r.at(t) - p);
@@ -29,15 +31,15 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc = *center - *r.origin();
 
     // quadratic equation
-    let a = dot(*r.direction(), *r.direction());
-    let b = -2.0 * dot(*r.direction(), oc);
-    let c = dot(oc, oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = r.direction().length_squared();
+    let h = dot(*r.direction(), oc);
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = h * h - a * c;
 
     if discriminant < 0.0 {
         -1.0 // didn't hit
     } else {
-        (-b - discriminant.sqrt()) / (2.0 * a) // distance t
+        (h - discriminant.sqrt()) / a // distance t
     }
 }
 
