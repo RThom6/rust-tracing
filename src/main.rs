@@ -8,8 +8,13 @@ pub mod ray;
 pub mod vec3;
 
 fn ray_color(r: &Ray) -> Color {
-    if hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.2, r) {
-        return Color::new(1.0, 0.0, 0.0);
+    // p = center of sphere
+    let p = Point3::new(0.2, 0.1, -1.0);
+    let t = hit_sphere(&p, 0.2, r);
+
+    if t > 0.0 {
+        let n = unit_vector(r.at(t) - p);
+        return 0.5 * Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
     }
 
     // multiplying by distance t would give exact 3D point at that distance
@@ -20,16 +25,20 @@ fn ray_color(r: &Ray) -> Color {
     return (1.0 - a) * Color::new(0.9, 1.0, 0.3) + a * Color::new(0.6, 0.0, 1.0);
 }
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc = *center - *r.origin();
 
     // quadratic equation
     let a = dot(*r.direction(), *r.direction());
     let b = -2.0 * dot(*r.direction(), oc);
     let c = dot(oc, oc) - radius * radius;
-    let disctriminant = b * b - 4.0 * a * c;
+    let discriminant = b * b - 4.0 * a * c;
 
-    disctriminant >= 0.0
+    if discriminant < 0.0 {
+        -1.0 // didn't hit
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a) // distance t
+    }
 }
 
 fn main() {
