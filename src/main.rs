@@ -1,46 +1,31 @@
 use crate::color::{Color, write_color};
+use crate::hittable::{HitRecord, Hittable};
+use crate::hittable_list::HittableList;
 use crate::ray::Ray;
+use crate::sphere::Sphere;
 use crate::vec3::*;
 use std::io::{self, Write};
 
-pub mod color;
-pub mod hittable;
-pub mod ray;
-pub mod sphere;
-pub mod vec3;
+mod color;
+mod common;
+mod hittable;
+mod hittable_list;
+mod ray;
+mod sphere;
+mod vec3;
 
-fn ray_color(r: &Ray) -> Color {
-    // p = center of sphere
-    let p = Point3::new(0.0, 0.0, -1.0);
-    let t = hit_sphere(&p, 0.5, r);
-
-    if t > 0.0 {
-        let n = unit_vector(r.at(t) - p);
-        return 0.5 * Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+fn ray_color(r: &Ray, world: &HittableList) -> Color {
+    let mut rec = HitRecord::new();
+    if world.hit(r, 0.0, common::INFINITY, &mut rec) {
+        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
     }
 
     // multiplying by distance t would give exact 3D point at that distance
-    let unit_direction = unit_vector(*r.direction());
+    let unit_direction = unit_vector(r.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
 
     // Start color -> end color
     return (1.0 - a) * Color::new(0.9, 1.0, 0.3) + a * Color::new(0.6, 0.0, 1.0);
-}
-
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = *center - *r.origin();
-
-    // quadratic equation
-    let a = r.direction().length_squared();
-    let h = dot(*r.direction(), oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
-
-    if discriminant < 0.0 {
-        -1.0 // didn't hit
-    } else {
-        (h - discriminant.sqrt()) / a // distance t
-    }
 }
 
 fn main() {
@@ -59,6 +44,13 @@ fn main() {
     let viewport_height: f64 = 2.0;
     let viewport_width: f64 = (viewport_height * (image_width / image_height)).floor();
     let camera_center = Point3::new(0.0, 0.0, 0.0);
+
+    // World
+
+    let mut world = HittableList::new();
+
+    world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Calculate vectors across the horizontal and down the vertical viewport edges
     let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
@@ -90,7 +82,7 @@ fn main() {
             // start point and the direction vector
             let r = Ray::new(camera_center, ray_direction);
 
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             write_color(&mut io::stdout(), pixel_color);
         }
     }
