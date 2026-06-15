@@ -1,4 +1,4 @@
-use std::io::{self, Write, stdout};
+use std::io::{self, Write};
 
 use crate::{
     color::{Color, write_color},
@@ -6,7 +6,7 @@ use crate::{
     hittable::{HitRecord, Hittable},
     interval::Interval,
     ray::Ray,
-    vec3::{Point3, Vec3, unit_vector},
+    vec3::{Point3, Vec3, random_on_hemisphere, unit_vector},
 };
 
 #[derive(Default)]
@@ -85,7 +85,8 @@ impl Camera {
     fn ray_color(&self, r: &Ray, world: &Box<dyn Hittable>) -> Color {
         let mut rec = HitRecord::new();
         if world.hit(r, Interval::of(0.0, common::INFINITY), &mut rec) {
-            return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
+            let direction = random_on_hemisphere(rec.normal);
+            return 0.5 * self.ray_color(&Ray::new(rec.p, direction), world);
         }
 
         // multiplying by distance t would give exact 3D point at that distance

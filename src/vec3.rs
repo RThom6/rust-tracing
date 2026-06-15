@@ -3,6 +3,8 @@ use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
+use crate::common::{random_double, random_double_from};
+
 #[derive(Copy, Clone, Default, Debug, PartialEq)]
 pub struct Vec3 {
     // x, y, z are the steps of displacement along each axis between A and B
@@ -201,4 +203,39 @@ pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
     v / v.length()
+}
+
+pub fn random_unit_vector() -> Vec3 {
+    loop {
+        let p = random();
+        let lensq = p.length_squared();
+        if 1e-160 < lensq && lensq <= 1.0 {
+            // Normalising could cause infinity vectors if all within 1e-160 'black hole'
+            return p / lensq.sqrt();
+        }
+    }
+}
+
+// Ensures vector is in the same 'hemisphere' aka direction -> not pointing in towards the material
+pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+
+    // vector is in the same hemisphere as the normal
+    if dot(on_unit_sphere, normal) > 0.0 {
+        on_unit_sphere
+    } else {
+        -on_unit_sphere
+    }
+}
+
+pub fn random() -> Vec3 {
+    Vec3::new(random_double(), random_double(), random_double())
+}
+
+pub fn random_in_range(min: f64, max: f64) -> Vec3 {
+    Vec3::new(
+        random_double_from(min, max),
+        random_double_from(min, max),
+        random_double_from(min, max),
+    )
 }
