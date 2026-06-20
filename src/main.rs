@@ -19,7 +19,7 @@ fn main() {
     let mut world = HittableList::new();
 
     world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.5), 0.5)));
-    world.add(Box::new(Sphere::new(Point3::new(0.0, -10.5, -2.0), 10.0)));
+    world.add(Box::new(Sphere::new(Point3::new(0.0, -10.5, -1.0), 10.0)));
 
     let mut cam: Camera = Camera::new();
 

@@ -14,6 +14,7 @@ pub struct Camera {
     pub aspect_ratio: f64,
     pub image_width: f64,
     pub samples_per_pixel: u32,
+    pub max_depth: usize, // Limits the number of child rays
     image_height: f64,
     center: Point3,
     pixel00_loc: Point3,
@@ -41,7 +42,7 @@ impl Camera {
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += self.ray_color(&r, &world);
+                    pixel_color += self.ray_color(&r, self.max_depth, &world);
                 }
 
                 write_color(&mut io::stdout(), self.pixel_samples_scale * pixel_color);
@@ -60,6 +61,8 @@ impl Camera {
         };
 
         self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f64;
+
+        self.max_depth = 50;
 
         self.center = Point3::new(0.0, 0.0, 0.0);
 
@@ -82,11 +85,15 @@ impl Camera {
         self.pixel00_loc = viewport_upper_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
     }
 
-    fn ray_color(&self, r: &Ray, world: &Box<dyn Hittable>) -> Color {
+    fn ray_color(&self, r: &Ray, depth: usize, world: &Box<dyn Hittable>) -> Color {
+        if depth <= 0 {
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
         let mut rec = HitRecord::new();
         if world.hit(r, Interval::of(0.0, common::INFINITY), &mut rec) {
             let direction = random_on_hemisphere(rec.normal);
-            return 0.5 * self.ray_color(&Ray::new(rec.p, direction), world);
+            return 0.5 * self.ray_color(&Ray::new(rec.p, direction), depth - 1, world);
         }
 
         // multiplying by distance t would give exact 3D point at that distance
