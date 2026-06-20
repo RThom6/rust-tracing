@@ -6,7 +6,7 @@ use crate::{
     hittable::{HitRecord, Hittable},
     interval::Interval,
     ray::Ray,
-    vec3::{Point3, Vec3, random_on_hemisphere, unit_vector},
+    vec3::{Point3, Vec3, random_unit_vector, unit_vector},
 };
 
 #[derive(Default)]
@@ -91,9 +91,9 @@ impl Camera {
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, Interval::of(0.0, common::INFINITY), &mut rec) {
-            let direction = random_on_hemisphere(rec.normal);
-            return 0.5 * self.ray_color(&Ray::new(rec.p, direction), depth - 1, world);
+        if world.hit(r, Interval::of(0.0001, common::INFINITY), &mut rec) {
+            let direction = rec.normal + random_unit_vector();
+            return 0.7 * self.ray_color(&Ray::new(rec.p, direction), depth - 1, world);
         }
 
         // multiplying by distance t would give exact 3D point at that distance
