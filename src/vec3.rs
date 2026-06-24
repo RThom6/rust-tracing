@@ -238,6 +238,14 @@ pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
     Vec3::from(v - 2.0 * dot(v, n) * n)
 }
 
+pub fn refract(incident_ray: Vec3, surface_normal: Vec3, etai_over_etai: f64) -> Vec3 {
+    let cos_theta = dot(-incident_ray, surface_normal).min(1.0); // angle between incident ray and normal
+    let r_out_perp = etai_over_etai * (incident_ray + cos_theta * surface_normal);
+    let r_out_parallel = -((1.0 - r_out_perp.length_squared()).sqrt()) * surface_normal;
+
+    return r_out_perp + r_out_parallel;
+}
+
 pub fn random() -> Vec3 {
     Vec3::new(random_double(), random_double(), random_double())
 }

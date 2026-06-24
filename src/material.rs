@@ -2,7 +2,7 @@ use crate::{
     color::Color,
     hittable::HitRecord,
     ray::Ray,
-    vec3::{dot, random_unit_vector, reflect, unit_vector},
+    vec3::{dot, random_unit_vector, reflect, refract, unit_vector},
 };
 
 pub trait Material {
@@ -74,5 +74,39 @@ impl Material for Metal {
         *attenuation = self.albedo;
 
         return dot(scattered.direction(), rec.normal) > 0.0;
+    }
+}
+
+pub struct Dielectric {
+    refractive_idx: f64,
+}
+
+impl Dielectric {
+    pub fn new(refractive_idx: f64) -> Self {
+        Self { refractive_idx }
+    }
+}
+
+impl Material for Dielectric {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        rec: &HitRecord,
+        attenuation: &mut Color,
+        scattered: &mut Ray,
+    ) -> bool {
+        *attenuation = Color::new(1.0, 1.0, 1.0);
+        let ri = if rec.front_face {
+            1.0 / self.refractive_idx
+        } else {
+            self.refractive_idx
+        };
+
+        let unit_direction = unit_vector(r_in.direction());
+        let refracted = refract(unit_direction, rec.normal, ri);
+
+        // p -> point which the ray hit the surface
+        *scattered = Ray::new(rec.p, refracted);
+        return true;
     }
 }
