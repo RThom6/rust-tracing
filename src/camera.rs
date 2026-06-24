@@ -6,7 +6,7 @@ use crate::{
     hittable::{HitRecord, Hittable},
     interval::Interval,
     ray::Ray,
-    vec3::{Point3, Vec3, random_unit_vector, unit_vector},
+    vec3::{Point3, Vec3, unit_vector},
 };
 
 #[derive(Default)]
@@ -62,8 +62,6 @@ impl Camera {
 
         self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f64;
 
-        self.max_depth = 50;
-
         self.center = Point3::new(0.0, 0.0, 0.0);
 
         let focal_length = 1.0;
@@ -92,8 +90,19 @@ impl Camera {
 
         let mut rec = HitRecord::new();
         if world.hit(r, Interval::of(0.0001, common::INFINITY), &mut rec) {
-            let direction = rec.normal + random_unit_vector();
-            return 0.7 * self.ray_color(&Ray::new(rec.p, direction), depth - 1, world);
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+
+            if rec
+                .mat
+                .as_ref()
+                .unwrap()
+                .scatter(r, &rec, &mut attenuation, &mut scattered)
+            {
+                return attenuation * self.ray_color(&scattered, depth - 1, world);
+            }
+
+            return Color::new(0.0, 0.0, 0.0);
         }
 
         // multiplying by distance t would give exact 3D point at that distance
@@ -101,7 +110,7 @@ impl Camera {
         let a = 0.5 * (unit_direction.y() + 1.0);
 
         // Start color -> end color
-        return (1.0 - a) * Color::new(0.9, 1.0, 0.3) + a * Color::new(0.6, 0.0, 1.0);
+        return (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
     }
 
     fn get_ray(&self, i: u32, j: u32) -> Ray {

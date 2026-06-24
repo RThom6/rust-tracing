@@ -12,7 +12,7 @@ pub fn degrees_to_radians(degrees: f64) -> f64 {
 
 pub fn random_double() -> f64 {
     let mut rng = rand::rng();
-    rng.random_range(0.0..1.0)
+    rng.random_range(-1.0..1.0)
 }
 
 pub fn random_double_from(min: f64, max: f64) -> f64 {

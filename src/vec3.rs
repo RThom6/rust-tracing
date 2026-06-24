@@ -215,7 +215,7 @@ pub fn random_unit_vector() -> Vec3 {
     loop {
         let p = random();
         let lensq = p.length_squared();
-        if 1e-160 < lensq && lensq <= 1.0 {
+        if 1e-160 < lensq.abs() && lensq.abs() <= 1.0 {
             // Normalising could cause infinity vectors if all within 1e-160 'black hole'
             return p / lensq.sqrt();
         }
@@ -232,6 +232,10 @@ pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
     } else {
         -on_unit_sphere
     }
+}
+
+pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+    Vec3::from(v - 2.0 * dot(v, n) * n)
 }
 
 pub fn random() -> Vec3 {
