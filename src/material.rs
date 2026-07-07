@@ -2,7 +2,7 @@ use crate::{
     color::Color,
     hittable::HitRecord,
     ray::Ray,
-    vec3::{dot, random_unit_vector, reflect, refract, unit_vector},
+    vec3::{Vec3, dot, random_unit_vector, reflect, refract, unit_vector},
 };
 
 pub trait Material {
@@ -103,10 +103,20 @@ impl Material for Dielectric {
         };
 
         let unit_direction = unit_vector(r_in.direction());
-        let refracted = refract(unit_direction, rec.normal, ri);
+        let cos_theta = dot(-unit_direction, rec.normal).min(1.0); // angle between incident ray and normal
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+        let direction: Vec3;
+
+        if ri * sin_theta > 1.0 {
+            // reflects instead of refracting when angle greater than pi/2 rad
+            direction = reflect(unit_direction, rec.normal);
+        } else {
+            direction = refract(unit_direction, rec.normal, ri);
+        }
 
         // p -> point which the ray hit the surface
-        *scattered = Ray::new(rec.p, refracted);
+        *scattered = Ray::new(rec.p, direction);
         return true;
     }
 }
