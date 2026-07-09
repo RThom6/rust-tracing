@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::camera::Camera;
 use crate::color::Color;
-use crate::cuboid::Cuboid;
+use crate::cuboid::{Cuboid, rotation_from_degrees};
 use crate::hittable_list::HittableList;
 use crate::material::{Dielectric, Lambertian, Metal};
 use crate::ray::Ray;
@@ -51,10 +51,11 @@ fn main() {
         0.5,
         material_right,
     )));
+
     world.add(Box::new(Cuboid::new(
-        Point3::new(0.55, -0.2, -0.5),
-        Vec3::new(-0.4, -0.1, -0.1),
+        Point3::new(0.55, -0.2, -0.6),
         Vec3::new(0.1, 0.1, 0.1),
+        rotation_from_degrees(35.0, 0.0, 30.0),
         material_left2,
     )));
 
