@@ -1,5 +1,6 @@
 use crate::{
     color::Color,
+    common::random_double,
     hittable::HitRecord,
     ray::Ray,
     vec3::{Vec3, dot, random_unit_vector, reflect, refract, unit_vector},
@@ -85,6 +86,13 @@ impl Dielectric {
     pub fn new(refractive_idx: f64) -> Self {
         Self { refractive_idx }
     }
+
+    fn reflectance(&self, cosine: f64, refraction_index: f64) -> f64 {
+        // Schlick approximation of reflectivity varying with angle
+        let mut r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
+        r0 = r0 * r0;
+        return r0 + ((1.0 - r0) * (1.0 - cosine).powf(5.0));
+    }
 }
 
 impl Material for Dielectric {
@@ -108,7 +116,7 @@ impl Material for Dielectric {
 
         let direction: Vec3;
 
-        if ri * sin_theta > 1.0 {
+        if ri * sin_theta > 1.0 || self.reflectance(cos_theta, ri) > random_double() {
             // reflects instead of refracting when angle greater than pi/2 rad
             direction = reflect(unit_direction, rec.normal);
         } else {

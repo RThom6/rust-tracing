@@ -2,7 +2,7 @@ use std::io::{self, Write};
 
 use crate::{
     color::{Color, write_color},
-    common::{self, random_double},
+    common::{self, degrees_to_radians, random_double},
     hittable::{HitRecord, Hittable},
     interval::Interval,
     ray::Ray,
@@ -15,6 +15,7 @@ pub struct Camera {
     pub image_width: f64,
     pub samples_per_pixel: u32,
     pub max_depth: usize, // Limits the number of child rays
+    pub vfov: f64,        // vertical view angle (fov)
     image_height: f64,
     center: Point3,
     pixel00_loc: Point3,
@@ -65,7 +66,9 @@ impl Camera {
         self.center = Point3::new(0.0, 0.0, 0.0);
 
         let focal_length = 1.0;
-        let viewport_height: f64 = 2.0;
+        let theta = degrees_to_radians(self.vfov);
+        let h = (theta / 2.0).tan();
+        let viewport_height: f64 = 2.0 * h * focal_length;
         let viewport_width: f64 =
             (viewport_height * (self.image_width / self.image_height)).floor();
 
